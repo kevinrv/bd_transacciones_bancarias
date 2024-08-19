@@ -197,4 +197,4 @@ SELECT*FROM detalle_cuentas;
 
 SELECT*FROM cuentas_copy;
 
--- 
+-- Insersión de datos en transacciones.
