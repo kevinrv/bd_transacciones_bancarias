@@ -1,3 +1,5 @@
+USE dsrp_transacciones_bancarias;
+
 -- Insercion de datos
 
 -- Tipos_transaccion
@@ -129,7 +131,7 @@ VALUES
 
 	SELECT*FROM clientes;
 
-	-- Insertar datos en la tabla cuentas
+	-- Insertar datos en la tabla cuentas y detalle_cuentas
 	SELECT*FROM tipos_cuenta;
 
 	SELECT * FROM cuentas;
@@ -139,27 +141,36 @@ VALUES
 	(1,'3647007245101015','150','2023-11-14','Activo');
 
 	
+	-- Insersión aleatoria
 
 DECLARE @Counter INT
+DECLARE @cliente_id INT
 SET @Counter = 0
+SET @cliente_id = 0
+
 
 WHILE @Counter < 1000
 BEGIN
 INSERT INTO cuentas (tipo_cuenta_id,numero_cuenta,saldo,fecha_apertura,estado)
 SELECT 
-  t.id AS tipo_cuenta_id,
-  CAST(ROUND(RAND() * 1000000,0) AS VARCHAR(50)) AS numero_cuenta, -- Número de cuenta aleatorio
+  t.id AS 'tipo_cuenta_id',
+  CONCAT('0001',CAST(ROUND(RAND() * 1000000,0) AS VARCHAR(50)),CAST(ROUND(RAND() * 1000000,0) AS VARCHAR(50))) AS numero_cuenta, -- Número de cuenta aleatorio
   ROUND(RAND() * 100000, 2) AS saldo, -- Saldo aleatorio
   DATEADD(DAY, -ROUND(RAND() * 780,0), GETDATE()) AS fecha_pertura, -- Fecha de apertura en los últimos 365 días
-  ROUND(RAND(),0) AS estado -- Estado aleatorio (0 o 1)
+  ROUND(RAND(),0) AS estado -- Estado aleatorio (0 o 1),
 FROM clientes c
 CROSS JOIN tipos_cuenta t
 ORDER BY NEWID()
 OFFSET 0 ROWS
 FETCH NEXT 1 ROWS ONLY;
     SET @Counter = @Counter + 1
+	-- Capturar un id aleatorio de la tabal cliente
+	SET @cliente_id = (SELECT TOP 1 id FROM clientes ORDER BY NEWID())
+	-- Insertar datos en la tabla detalle_cuentas
+	INSERT INTO detalle_cuentas VALUES(@cliente_id,SCOPE_IDENTITY())
 END
 
+SELECT NEWID();
 
 -- Uniformizando tamaño del número de cuentas
 UPDATE cuentas SET numero_cuenta= CONCAT(numero_cuenta,numero_cuenta,numero_cuenta)
@@ -174,4 +185,16 @@ WHERE estado='1';
 UPDATE cuentas SET estado='Inactivo'
 WHERE estado='0';
 
-SELECT*FROM cuentas;
+--Resetear el Id Identity de una tabla
+DBCC CHECKIDENT ('cuentas', RESEED, 0); 
+DBCC CHECKIDENT ('detalle_cuentas', RESEED, 0); 
+
+SELECT*
+INTO cuentas_copy
+FROM cuentas;
+
+SELECT*FROM detalle_cuentas;
+
+SELECT*FROM cuentas_copy;
+
+-- Insersión de datos en transacciones.
