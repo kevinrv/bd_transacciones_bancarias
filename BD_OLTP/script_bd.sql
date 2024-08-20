@@ -87,4 +87,17 @@ CONSTRAINT fk_transacciones_tipo_transaccion FOREIGN KEY (tipo_transaccion_id) R
 CONSTRAINT fk_transacciones_sucursales FOREIGN KEY (sucursal_id) REFERENCES sucursales(id),
 CONSTRAINT fk_transacciones_cuenta_origen FOREIGN KEY (numero_cuenta_origen_id) REFERENCES cuentas(id),
 CONSTRAINT fk_transacciones_cuenta_destino FOREIGN KEY (numero_cuenta_destino_id) REFERENCES cuentas(id)
-)
+);
+
+-- modificaciones
+
+-- Agregar un nueva columna a la tabla cuentas
+ALTER TABLE cuentas 
+ADD sucursal_origen_id INT;
+--- Editar columna tiene que ser not null
+ALTER TABLE cuentas 
+ALTER COLUMN sucursal_origen_id INT NOT NULL;
+
+-- Agregar un FK
+ALTER TABLE cuentas
+ADD CONSTRAINT fk_cuentas_sucursal_origen FOREIGN KEY (sucursal_origen_id) REFERENCES sucursales(id);

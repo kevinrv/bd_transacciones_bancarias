@@ -151,15 +151,17 @@ SET @cliente_id = 0
 
 WHILE @Counter < 1000
 BEGIN
-INSERT INTO cuentas (tipo_cuenta_id,numero_cuenta,saldo,fecha_apertura,estado)
+INSERT INTO cuentas (tipo_cuenta_id,numero_cuenta,saldo,fecha_apertura,estado,sucursal_origen_id)
 SELECT 
   t.id AS 'tipo_cuenta_id',
   CONCAT('0001',CAST(ROUND(RAND() * 1000000,0) AS VARCHAR(50)),CAST(ROUND(RAND() * 1000000,0) AS VARCHAR(50))) AS numero_cuenta, -- Número de cuenta aleatorio
   ROUND(RAND() * 100000, 2) AS saldo, -- Saldo aleatorio
   DATEADD(DAY, -ROUND(RAND() * 780,0), GETDATE()) AS fecha_pertura, -- Fecha de apertura en los últimos 365 días
-  ROUND(RAND(),0) AS estado -- Estado aleatorio (0 o 1),
+  ROUND(RAND(),0) AS estado,-- Estado aleatorio (0 o 1),
+  s.id AS 'sucursal_origen_id'
 FROM clientes c
 CROSS JOIN tipos_cuenta t
+CROSS JOIN sucursales s
 ORDER BY NEWID()
 OFFSET 0 ROWS
 FETCH NEXT 1 ROWS ONLY;
@@ -195,6 +197,38 @@ FROM cuentas;
 
 SELECT*FROM detalle_cuentas;
 
-SELECT*FROM cuentas_copy;
+SELECT*FROM cuentas;
+
+--eliminar datos
+
+DELETE FROM detalle_cuentas;
+DELETE FROM cuentas;
 
 -- Insersión de datos en transacciones.
+SELECT*FROM transacciones;
+
+DECLARE @Counter INT
+SET @Counter = 0
+
+WHILE @Counter < 1000
+BEGIN
+INSERT INTO transacciones(tipo_transaccion_id,sucursal_id,numero_cuenta_origen_id,numero_cuenta_destino_id,fecha_transaccion,monto,created_at,created_by)
+SELECT 
+  t.id AS 'tipo_transaccion_id',
+  s.id AS 'sucursal_id',
+  c.id AS 'numero_cuenta_origen_id',
+  c1.id AS 'numero_cuenta_destino_id',
+  DATEADD(DAY, -ROUND(RAND() * 780,0), GETDATE()) AS 'fecha_transaccion', -- Fecha de transaccion en los últimos 780 días
+  ROUND(RAND() * 10000, 2) AS monto,
+  GETDATE(),-- Monto aleatorio
+  ROUND(RAND() * 10, 0)
+FROM cuentas c
+CROSS JOIN tipos_transaccion t
+CROSS JOIN sucursales s
+CROSS JOIN cuentas c1 
+ORDER BY NEWID()
+OFFSET 0 ROWS
+FETCH NEXT 1 ROWS ONLY;
+    SET @Counter = @Counter + 1
+END
+
