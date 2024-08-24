@@ -20,7 +20,6 @@ GO
 
 CREATE TABLE [dim_cuenta] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[numero_cuenta] VARCHAR,
 	[tipo_cuenta] VARCHAR,
 	PRIMARY KEY([id])
 );
@@ -74,4 +73,24 @@ ADD CONSTRAINT FK_hechos_dim_sucursal FOREIGN KEY (dim_sucursal_id) REFERENCES d
 
 ALTER TABLE [hechos_transacciones]
 ADD CONSTRAINT FK_hechos_dim_transacciones FOREIGN KEY (dim_transaccion_id) REFERENCES dim_transacciones(id);
+
+
+ALTER TABLE dim_cliente
+ADD cliente_id INT;
+
+ALTER TABLE dim_sucursal
+ADD sucursal_id INT NOT NULL;
+
+ALTER TABLE dim_cuenta
+ADD tipo_cuenta_id INT;
+
+ALTER TABLE dim_transacciones
+ADD tipo_transaccion_id INT;
+
+ALTER TABLE dim_tiempo
+ADD fecha_transaccion DATETIME;
+
+ALTER TABLE dim_tiempo
+ADD nombre_mes VARCHAR(55);
+
 
