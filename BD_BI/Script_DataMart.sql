@@ -2,41 +2,41 @@ USE dsrp_transacciones_bancarias_bi;
 
 CREATE TABLE [dim_tiempo] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[dia] VARCHAR,
-	[mes] VARCHAR,
-	[trimestre] VARCHAR,
-	[anio] VARCHAR,
+	[dia] VARCHAR(10),
+	[mes] VARCHAR(10),
+	[trimestre] VARCHAR(10),
+	[anio] VARCHAR(10),
 	PRIMARY KEY([id])
 );
 GO
 
 CREATE TABLE [dim_cliente] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[nombre] VARCHAR,
-	[segmento] VARCHAR,
+	[nombre] VARCHAR(255),
+	[segmento] VARCHAR(100),
 	PRIMARY KEY([id])
 );
 GO
 
 CREATE TABLE [dim_cuenta] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[tipo_cuenta] VARCHAR,
+	[tipo_cuenta] VARCHAR(255),
 	PRIMARY KEY([id])
 );
 GO
 
 CREATE TABLE [dim_sucursal] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[nombre] VARCHAR,
-	[ciudad] VARCHAR,
-	[region] VARCHAR,
+	[nombre] VARCHAR(255),
+	[ciudad] VARCHAR(255),
+	[region] VARCHAR(255),
 	PRIMARY KEY([id])
 );
 GO
 
 CREATE TABLE [dim_transacciones] (
 	[id] INTEGER NOT NULL IDENTITY UNIQUE,
-	[tipo_transaccion] VARCHAR,
+	[tipo_transaccion] VARCHAR (255),
 	PRIMARY KEY([id])
 );
 GO

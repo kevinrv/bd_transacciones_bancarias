@@ -3,11 +3,14 @@ GO
 
 -- Consulta para poblar la dimensión cliente
 
+CREATE VIEW VW_KV_DIMENSION_CLIENTES AS
 SELECT
 	CONCAT(nombres,' ',apellidos) AS 'nombre',
 	segemento AS 'segmento',
 	id AS 'cliente_id'
 FROM clientes;
+
+SELECT*FROM VW_KV_DIMENSION_CLIENTES;
 
 -- Consulta para poblar la dimensión cuenta
 
@@ -39,12 +42,12 @@ FROM tipos_transaccion;
 
 SELECT 
 	DISTINCT 
-	DAY(fecha_transaccion) AS 'dia',
-	MONTH(fecha_transaccion) AS 'mes',
-	DATEPART(QUARTER,fecha_transaccion) AS 'trimestre',
-	YEAR(fecha_transaccion) AS 'anio',
+	CAST(DAY(fecha_transaccion)AS VARCHAR) AS 'dia',
+	CAST(MONTH(fecha_transaccion) AS VARCHAR) AS 'mes',
+	CAST(DATEPART(QUARTER,fecha_transaccion) AS VARCHAR) AS 'trimestre',
+	CAST(YEAR(fecha_transaccion)AS VARCHAR) AS 'anio',
 	fecha_transaccion,
-	DATENAME(MONTH,fecha_transaccion) 'nombre_mes'
+	CAST(DATENAME(MONTH,fecha_transaccion) AS VARCHAR) AS 'nombre_mes'
 FROM transacciones; 
 
 -- Consulta para poblar la tabla hechos transacciones
@@ -99,3 +102,8 @@ SELECT*FROM tipos_transaccion;
 SELECT*FROM tipos_cuenta;
 SELECT*FROM transacciones;
 SELECT*FROM cuentas;
+
+USE dsrp_transacciones_bancarias_bi;
+go
+
+SELECT*FROM dim_tiempo;
