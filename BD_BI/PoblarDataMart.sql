@@ -1,6 +1,7 @@
 USE dsrp_transacciones_bancarias;
 GO
 
+
 -- Consulta para poblar la dimensión cliente
 
 CREATE VIEW VW_KV_DIMENSION_CLIENTES AS
@@ -10,16 +11,25 @@ SELECT
 	id AS 'cliente_id'
 FROM clientes;
 
+--Insertando data en la dimensión Cliente
+INSERT INTO dsrp_transacciones_bancarias_bi.dbo.dim_cliente
 SELECT*FROM VW_KV_DIMENSION_CLIENTES;
 
 -- Consulta para poblar la dimensión cuenta
 
 SELECT 
-	c.numero_cuenta,
 	tc.nombre AS 'tipo_cuenta',
-	c.id AS 'cuenta_id'
-FROM cuentas c
-	INNER JOIN tipos_cuenta tc ON tc.id=c.tipo_cuenta_id;
+	tc.id AS 'tipo_cuenta_id'
+FROM  tipos_cuenta tc
+
+-- Insertando data en tabla dimensión cuentas
+
+INSERT INTO dsrp_transacciones_bancarias_bi.dbo.dim_cuenta
+SELECT 
+	tc.nombre AS 'tipo_cuenta',
+	tc.id AS 'tipo_cuenta_id'
+FROM  tipos_cuenta tc
+
 
 -- Consulta para poblar la dimensión sucursal
 
@@ -61,7 +71,7 @@ SELECT
 	t.monto,
 	c.saldo-t.monto AS 'saldo_antes',
 	c.saldo AS 'saldo_despues',
-	COUNT(t.id)
+	COUNT(t.id) AS 'numero_transacciones'
 FROM transacciones t
 INNER JOIN cuentas c ON c.id=t.numero_cuenta_destino_id
 INNER JOIN detalle_cuentas dc ON dc.cuenta_id=c.id
@@ -84,7 +94,7 @@ SELECT
 	t.monto,
 	c.saldo+t.monto AS 'saldo_antes',
 	c.saldo AS 'saldo_despues',
-	COUNT(t.id)
+	COUNT(t.id) AS 'numero_transacciones'
 FROM transacciones t
 INNER JOIN cuentas c ON c.id=t.numero_cuenta_origen_id
 INNER JOIN detalle_cuentas dc ON dc.cuenta_id=c.id
@@ -107,3 +117,10 @@ USE dsrp_transacciones_bancarias_bi;
 go
 
 SELECT*FROM dim_tiempo;
+SELECT*FROM dim_cliente;
+SELECT*FROM dim_sucursal;
+SELECT*FROM dim_cuenta;
+SELECT*FROM dim_transacciones;
+SELECT*FROM hechos_transacciones;
+
+
