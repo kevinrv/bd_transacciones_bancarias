@@ -2,13 +2,13 @@ USE dsrp_transacciones_bancarias;
 /*Introducción
 2. Optimización del Modelo de Datos
 2.1. Normalización vs. Desnormalización
-Se recomienda normalizar hasta la 3FN para evitar redundancia de datos.
-En escenarios de consultas analíticas, se pueden aplicar técnicas de desnormalización para mejorar el rendimiento.
+Se recomienda normalizar hasta la 3FN para evitar redundancia de datos. OLTP
+En escenarios de consultas analíticas, se pueden aplicar técnicas de desnormalización para mejorar el rendimiento.DW
+
 2.2. Indexación Estratégica
 Índices Clustered en claves primarias.
 Índices No Clustered en campos frecuentemente filtrados (e.g., numero_documento, numero_cuenta).
 Fill Factor ajustado según la tasa de inserción y actualización de datos.
-
 
 Tasa de Inserción/Actualización	Recomendación de Fill Factor
 Baja (consultas mayormente de lectura)	90-100%
@@ -25,6 +25,7 @@ WITH (FILLFACTOR = 80);
 Dividir tablas grandes como transacciones por rango de fechas.
 Considerar filegroups separados para mejorar el acceso a datos históricos.
 
+
 */
 -- Crear filegroup para 2022
 ALTER DATABASE dsrp_transacciones_bancarias
@@ -33,7 +34,7 @@ ADD FILEGROUP FG_Transacciones_2022;
 ALTER DATABASE dsrp_transacciones_bancarias
 ADD FILE (
     NAME = 'Transacciones_2022',
-    FILENAME = 'C:\Data\Transacciones_2022.ndf'
+    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\Transacciones_2022.ndf'
 ) TO FILEGROUP FG_Transacciones_2022;
 
 -- Crear filegroup para 2023
@@ -43,7 +44,7 @@ ADD FILEGROUP FG_Transacciones_2023;
 ALTER DATABASE dsrp_transacciones_bancarias
 ADD FILE (
     NAME = 'Transacciones_2023',
-    FILENAME = 'C:\Data\Transacciones_2023.ndf'
+    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER01\MSSQL\DATA\Transacciones_2023.ndf'
 ) TO FILEGROUP FG_Transacciones_2023;
 
 -- Filegroup predeterminado para datos actuales (2024-2025)
@@ -53,7 +54,7 @@ MODIFY FILEGROUP [PRIMARY] DEFAULT;
 
 CREATE PARTITION FUNCTION PF_TransaccionesPorFecha (DATE)
 AS RANGE LEFT FOR VALUES 
-('2022-12-31', '2023-12-31');
+('2022-12-31', '2024-12-31');
 /*
 
 3. Optimización de Consultas
@@ -62,7 +63,7 @@ AS RANGE LEFT FOR VALUES
 Ejemplo de análisis de una consulta:*/
 
 SET STATISTICS IO, TIME ON;
-SELECT * FROM transacciones WHERE monto > 10;
+SELECT * FROM transacciones WHERE monto > 1000;
 
 /*Evaluar lecturas lógicas y tiempos de ejecución.
 
@@ -71,6 +72,21 @@ Agregar índices si la búsqueda es recurrente.
 3.2. Evitar Escaneos Ineficientes
 
 Reemplazar SELECT * por columnas específicas.
+
+*/
+SELECT*FROM transacciones;
+
+SELECT
+tipo_transaccion_id,
+sucursal_id,
+numero_cuenta_origen_id,
+numero_cuenta_destino_id,
+fecha_transaccion,
+monto
+FROM transacciones;
+
+/*
+
 
 Optimizar JOIN con índices adecuados.*/
 SELECT 
@@ -90,7 +106,7 @@ INNER JOIN
     sucursales s ON t.sucursal_id = s.id
 WHERE 
     t.fecha_transaccion BETWEEN '2022-01-01' AND '2024-12-31'
-    AND s.nombre = 'Sucursal Lima Centro';
+   ;
 
 SELECT*FROM sucursales;
 -- Crear indices:
@@ -102,7 +118,7 @@ ON detalle_cuentas (cliente_id);
 Usar COVERING INDEX en consultas comunes.
 */
 CREATE INDEX IX_transacciones_covering
-ON transacciones (numero_cuenta_origen_id, sucursal_id, fecha_transaccion)
+ON transacciones (sucursal_id, fecha_transaccion)
 INCLUDE (monto);
 
 /*
